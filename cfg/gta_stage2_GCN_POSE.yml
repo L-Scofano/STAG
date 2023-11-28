@@ -1,0 +1,78 @@
+# action to dec
+dataset: GTA
+model_name: GCN_POSE
+model_specs:
+  input_dim: 63
+  dct_n: 60
+  aux_dim: 0 # auxilliary data 10 beta + 1 gender
+  point_extra_feat: 0
+  point_feat: 2048
+  nh_rnn: 128
+  nz: 128
+  nk: 1
+  rnn_type: gru
+  x_birnn: false
+  root_net_is_bn: true
+  wscene: false
+  wcont: true
+  lambdas: [ 1.0,    0.1,    0.1]
+  dist_flag: false   # * Flag to use Distance together with the 0/1 contact
+
+dataset_specs:
+  t_his: 30
+  t_pred: 60
+  
+
+  random_rot: true
+  num_scene_points: 20000
+  num_cont_points: 1000
+  step: 5
+  sigma: 0.2
+  cont_thre: 0.3
+  load_idx: true
+
+  data_file: ./data/data_v2_downsample0.02
+  idx_ckpt: ./data/idxs/
+
+lr: 5.e-4
+batch_size: 16
+num_epoch: 50
+num_epoch_fix: 1
+save_model_interval: 1
+
+
+# Flag for eval during training
+train_eval: 
+  s1: False
+  ckpt_path: 
+  epoch: 
+  mode: test
+  cfg_cont: gta_stage2_GCN_POSE
+  s2: True
+
+# For Wandb
+wandb_train:
+  mode: "online"
+  project: "contact_for_test"
+  entity: "pinlab-sapienza"
+  group: gta_stage2_gcn
+  job_type: train # ! Multiple runs e.g., seeds, in the same group should have the same job_type, they get collapsed together
+  name: s2_gcn_gru_end_peMod_last_frozen_16 # ! Important
+  tags: [gta, stage2, fc, decoder, finetuned, positinal_encoding]
+  notes: "gta_stage2 gcn gru fc decoder finetuned positional encoding"
+  resume: false
+  save_code: true
+
+
+# For Wandb
+wandb_test:
+  mode: "disabled"
+  project: "contact_for_test"
+  entity: "pinlab-sapienza"
+  group: test_our_s1
+  job_type: test # ! Multiple runs e.g., seeds, in the same group should have the same job_type, they get collapsed together
+  name: s2_gcn_gru_end_pe_last_woroot # ! Important
+  tags: [gta, stage2, full_gcn, dist]
+  notes: "gta_stage2"
+  resume: false
+  save_code: true

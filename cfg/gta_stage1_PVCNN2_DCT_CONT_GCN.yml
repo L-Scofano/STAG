@@ -1,0 +1,87 @@
+# action to dec
+dataset: GTA
+model_name: PVCNN2_DCT_CONT_GCN
+model_specs:
+  input_dim: 63
+  aux_dim: 0 # auxilliary data 10 beta + 1 gender
+  point_feat: 2048
+  nh_rnn: 128
+  nz: 128
+  nk: 1
+  rnn_type: gru
+  x_birnn: false
+  is_bn: true
+  dct_n: 20
+  lambdas: [ 1.0,   500.0]
+  sa_blocks: [[[64, 2, 32], [1024, 0.1, 32, [64, 128]]],
+              [[128, 2, 16], [256, 0.2, 32, [128, 128]]],
+              [[128, 2, 8], [64, 0.4, 32, [128, 256]]],
+              [[], [16, 0.8, 32, [256, 256, 512]]]]
+  fp_blocks: [[[256, 256], [256, 1, 8]],
+              [[256, 256], [256, 1, 8]],
+              [[256, 128], [128, 2, 16]],
+              [[128, 128, 64], [64, 1, 32]]]
+
+  wcont: True
+  dist_flag: false
+
+dataset_specs:
+  t_his: 30
+  t_pred: 60
+
+
+  random_rot: true
+  max_dist_from_human: 2.5
+  num_scene_points: 20000
+  step: 5
+  sigma: 0.2
+  cont_thre: 0.3
+  load_idx: true
+
+  # ! In Zeus
+  data_file: ./data/data_v2_downsample0.02
+  idx_ckpt: ./data/idxs
+
+
+
+lr: 1.e-3
+batch_size: 8 #16 #32
+num_epoch: 70
+num_epoch_fix: 1
+save_model_interval: 1
+
+# Flag for eval during training
+train_eval: 
+  s1: True
+  ckpt_path: "./results/stage_1/0070.p"
+  epoch: 
+  mode: test
+  cfg_cont: gta_stage1_PVCNN2_DCT_CONT_GCN
+  s2: False
+
+# For Wandb
+wandb_train:
+  mode: "online"
+  project: "contact_for"
+  entity: "pinlab-sapienza"
+  group: gta_stage1
+  job_type: train 
+  name: stage_1 
+  tags: [gta, stage1, PVCNN2_DCT_CONT]
+  notes: "gta_stage1_PVCNN2_DCT_CONT"
+  resume: false
+  save_code: true
+
+
+# For Wandb
+wandb_test:
+  mode: "online"
+  project: "contact_for"
+  entity: "pinlab-sapienza"
+  group: gta_stage1
+  job_type: train 
+  name: stage_1 
+  tags: [gta, stage1, PVCNN2_DCT_CONT]
+  notes: "gta_stage1_PVCNN2_DCT_CONT"
+  resume: false
+  save_code: true

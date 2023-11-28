@@ -27,10 +27,7 @@ class DatasetGTA(Dataset):
 
         self.data_file = data_file = dataset_specs.get('data_file')
         self.scene_split = {'train': ['r001','r002','r003', 'r006'],
-                            # !Luca: change this when you want to debug
                             'test': ['r010', 'r011', 'r013']
-                            # 'test': ['r010']
-
                             }
         self.pose = {}
         self.scene = {}
@@ -53,7 +50,7 @@ class DatasetGTA(Dataset):
             # if wscene or wcont:
             self.scene[i] = data_tmp['scene_points'] # no temporal dimension for scene points -> (N,3)
 
-            # !Change this when you want to debug
+            # !Uncomment when you want to debug
             # if len(self.pose) > 0:
             #     break
 

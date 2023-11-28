@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # *TRAIN CODE
 
 # Stage 1 -> contact points

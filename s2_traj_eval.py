@@ -49,9 +49,7 @@ def eval(
     dist_flag = cfg.model_specs['dist_flag']
 
 
-    pose_err = np.zeros(out_frames_n)
     path_err = np.zeros(out_frames_n)
-    all_err = np.zeros(out_frames_n)
     contact_err = np.zeros(out_frames_n)
 
     total_num_sample = 1e-20

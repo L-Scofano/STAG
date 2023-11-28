@@ -50,7 +50,6 @@ def train(epoch):
 
         joints = pose.to(device=device)
 
-        # * This is were they calculate the distance between joints. At time t the output is [npts, 21] where there is a distance for each joint
         is_cont = (scene_vert[:, None, :, None, :] - joints[:, :, None, :, :]).norm(dim=-1) # [bs, t_total, npts, 21]
 
         # * In such a contact map, closer scene points have higher values than far-away ones, whose values will be very close to zero
@@ -94,16 +93,16 @@ def train(epoch):
         if not args.w_est_cont:
             dist = is_cont
 
-            # * They only take one value for each joint
+            # * Only take one value for each joint
             min_dist_value = (dist.min(dim=2)[0] < 0.3).to(dtype=dtype) # [bs, t_total, 21] it is a 0/1 tensor
             min_dist_idx = dist.min(dim=2)[1].reshape([-1]) # [bs*t_total*21]
             
-            # * They create a temporary tensor to store the index of the batch
+            # * Create a temporary tensor to store the index of the batch
             idx_tmp = torch.arange(bs, device=device)[:, None].repeat([1, (t_pred + t_his) * nj]).reshape([-1])
 
             cont_points = scene_vert[idx_tmp, min_dist_idx, :].reshape([bs, t_his + t_pred, nj, 3]) # [bs, t_total, 21, 3]
 
-            # * They multiply the contact points by a 0/1 value to remove the points that are not in contact
+            # * Multiply the contact points by a 0/1 value to remove the points that are not in contact
             cont_points = cont_points * min_dist_value[..., None] # [bs, t_total, 21, 3]
             cont_points = torch.cat([cont_points, min_dist_value[..., None]], dim=-1)[:,t_his:]
 
@@ -151,7 +150,6 @@ def train(epoch):
     # if cfg.wandb_test['mode'] == 'online':
     #     train_platform.report_scalar(name_val = 'path_err',  value=path_err)
     #     train_platform.report_scalar(name_val = 'pose_err',  value=pose_err)
-    #     train_platform.report_scalar(name_val = 'all_err',  value=all_err)
 
 
     # print all of the losses
@@ -163,20 +161,13 @@ def train(epoch):
     #     for i in range(len(log_idx_frames)):
     #         train_platform.report_scalar(name_val = f'path_err_{log_idx_frames[i]}',  value=path_err[log_idxs1[i]])
     #         train_platform.report_scalar(name_val = f'pose_err_{log_idx_frames[i]}',  value=pose_err[log_idxs1[i]])
-    #         train_platform.report_scalar(name_val = f'all_err_{log_idx_frames[i]}',  value=all_err[log_idxs1[i]])
     #     train_platform.close()
     for i in range(len(log_idx_frames)):
         print(f'path_err_{log_idx_frames[i]}', path_err[log_idxs1[i]])
         print(f'pose_err_{log_idx_frames[i]}', pose_err[log_idxs1[i]])
-        print(f'all_err_{log_idx_frames[i]}', all_err[log_idxs1[i]])
     print('---------------------------------')
     print('path_err', path_err[log_idxs].mean())    
-    # print('pose_err', pose_err[log_idxs])
     print('pose_err', pose_err[log_idxs].mean())
-    # print('all_err', all_err[log_idxs])
-    print('all_err', all_err[log_idxs].mean())
-
-
 
     with open(csv_dir, 'a', encoding='UTF8') as f:
         writer = csv.writer(f)
@@ -198,10 +189,6 @@ def train(epoch):
         writer.writerow(data_joint)
         print("joint_err")
 
-        data_all_joint = ["all_joint_err"] + list(all_err[idxs_log]) + [all_err.mean()]
-        writer.writerow(data_all_joint)
-        print("all_joint_err")
-
         if cfg.wandb_test['mode'] == 'online':
             for name, value in zip(header_log[1:], data_path[1:]):
                 print(f"\t{name}: {value}")
@@ -211,11 +198,6 @@ def train(epoch):
             for name, value in zip(header_log[1:], data_joint[1:]):
                 print(f"\t{name}: {value}")
                 wandb.log({f"eval/{data_joint[0]}/{name}": value})
-
-
-            for name, value in zip(header_log[1:], data_all_joint[1:]):
-                print(f"\t{name}: {value}")
-                wandb.log({f"eval/{data_all_joint[0]}/{name}": value})
 
     if args.save_joint:
         np.savez_compressed(f'{cfg.result_dir}/prediction_{args.mode}.npz', y=y_for_save)

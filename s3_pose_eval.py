@@ -318,8 +318,6 @@ def eval(
             writer.writerow(data)
             data = ["joint_err"] + list(pose_err[idxs]) + [pose_err.mean()]
             writer.writerow(data)
-            data = ["all_joint_err"] + list(all_err[idxs]) + [all_err.mean()]
-            writer.writerow(data)
 
             writer.writerow(header_log)
             data = ["path_err"] + list(path_err[idxs_log]) + [path_err.mean()]
@@ -335,17 +333,6 @@ def eval(
             for name, value in zip(header_log[1:], data[1:]):
                 print(f"\t{name}: {value}")
                 wandb.log({f"eval/{data[0]}/{name}": value})
-
-            data = ["all_joint_err"] + list(all_err[idxs_log]) + [all_err.mean()]
-            writer.writerow(data)
-            print("all_joint_err")
-            for name, value in zip(header_log[1:], data[1:]):
-                print(f"\t{name}: {value}")
-                wandb.log({f"eval/{data[0]}/{name}": value})
-
-        # TODO:check
-        # if cfg.log.joint_file is not None:
-        #     np.savez_compressed(cfg.log.joint_file, y=y_for_save)
 
 
 def main(cfg, dtype: torch.dtype) -> None:

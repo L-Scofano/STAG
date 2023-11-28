@@ -14,9 +14,6 @@ from models.motion_pred import *
 from utils import *
 from utils.util import *
 
-# * log platform
-from utils.log_platform import WandbPlatform  
-
 from datetime import datetime
 
 import wandb
@@ -245,9 +242,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # if args.wandb:
-    #     train_platform = WandbPlatform(args.run_name)
-
+   
     """setup"""
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)

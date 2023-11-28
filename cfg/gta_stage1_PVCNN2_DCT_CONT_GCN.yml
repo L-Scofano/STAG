@@ -38,7 +38,6 @@ dataset_specs:
   cont_thre: 0.3
   load_idx: true
 
-  # ! In Zeus
   data_file: ./data/data_v2_downsample0.02
   idx_ckpt: ./data/idxs
 
@@ -61,27 +60,27 @@ train_eval:
 
 # For Wandb
 wandb_train:
-  mode: "online"
-  project: "contact_for"
-  entity: "pinlab-sapienza"
+  mode: "disabled"
+  project: " "
+  entity: " "
   group: gta_stage1
   job_type: train 
   name: stage_1 
-  tags: [gta, stage1, PVCNN2_DCT_CONT]
-  notes: "gta_stage1_PVCNN2_DCT_CONT"
+  tags: [gta, stage1]
+  notes: "stage 1 training"
   resume: false
   save_code: true
 
 
 # For Wandb
 wandb_test:
-  mode: "online"
-  project: "contact_for"
-  entity: "pinlab-sapienza"
+  mode: "disabled"
+  project: " "
+  entity: " "
   group: gta_stage1
   job_type: train 
   name: stage_1 
-  tags: [gta, stage1, PVCNN2_DCT_CONT]
-  notes: "gta_stage1_PVCNN2_DCT_CONT"
+  tags: [gta, stage1]
+  notes: "stage 1 testing"
   resume: false
   save_code: true

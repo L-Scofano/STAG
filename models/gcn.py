@@ -31,14 +31,10 @@ class GCN_TPOSE(nn.Module):
             cont_channels = 4
 
 
-        # encode input human poses
-        #self.x_enc = nn.Linear(input_dim+aux_dim, nh_rnn)
-        # ! Not used
         self.x_stsgcn_enc = STSGCN_layer(3, nh_rnn, (1,1), 1, time_dim=30, joints_dim=21)
         self.x_stsgcn_CP = STSGCN_layer(3, nh_rnn, (1,1), 1, time_dim=30, joints_dim=21)
 
         # encode pose sequences
-        #self.x_gru = nn.GRU(nh_rnn,nh_rnn)
         self.x_time_enc = nn.Sequential(nn.Linear(30, 10),
                                       nn.Tanh(),
                                       nn.Linear(10, 1),
@@ -52,9 +48,6 @@ class GCN_TPOSE(nn.Module):
 
         # encode contact
         if wcont:
-            #self.cont_enc = nn.Linear(cont_dim, nh_rnn)
-            #self.cont_gru = nn.GRU(nh_rnn,nh_rnn)
-            # ! Not used
             self.cont_stsgcn_enc = STSGCN_layer(cont_channels, nh_rnn, (1,1), 1, time_dim=60, joints_dim=21)
 
             self.cont_stsgcn_CP = STSGCN_layer(cont_channels, nh_rnn, (1,1), 1, time_dim=60, joints_dim=21)
@@ -149,12 +142,6 @@ class GCN_TPOSE(nn.Module):
         else:
             hx = xi
 
-        #hx = self.x_enc(hx) # [seq,bs,nh_rnn=128]  # [30, 4, 128]  # CHANGE
-        #hx = self.x_gru(hx)[1][0] # [bs,nh_rnn=128] # [4, 128]	# CHANGE -> GRAPH [4, 30, ..] -> [4, 128]
-        
-        # ! Not used
-        hxFC = self.x_stsgcn_enc(hx) 
-
         hxCP = self.x_stsgcn_CP(hx).permute(0,1,3,2).reshape(b, -1, t)
         hxCP = self.x_time_enc(hxCP).squeeze(-1).reshape(b,-1,v) # [b,c,v]
         hxCP = self.x_node_enc(hxCP).squeeze(-1) # [b,c]
@@ -167,20 +154,10 @@ class GCN_TPOSE(nn.Module):
             cont_tmp = cont_tmp.reshape(bc, tc, -1, cha_c).permute(0,3,1,2) # BCTV
             bc, cc, tc, vc = cont_tmp.shape
             
-            # ! Not used
-            hcontFC = self.cont_stsgcn_enc(cont_tmp) 
-
             hcontCP = self.cont_stsgcn_CP(cont_tmp).permute(0,1,3,2).reshape(bc, -1, tc) # [bs, t, c*v]
             hcontCP = self.cont_time_enc(hcontCP).squeeze(-1).reshape(bc,-1,vc) # [b,c,v]
             hcontCP = self.cont_node_enc(hcontCP).squeeze(-1) # [b,c]
             
-            # NO cont_tmp[:,:,:56] = 0
-            #hcont = self.cont_enc(cont_tmp) # [bs, seq, nh_rnn=128]
-            #hcont = self.cont_gru(hcont.transpose(0,1))[1][0] # [bs,nh_rnn=128]
-            
-
-        # predict global traj
-
         # * padded idx for dct, the first 30 frames are numbered and the rest are the last frame (29) repeated for 60 times 
         pad_idx = list(range(t_his))+[t_his-1]*horizon # [seq+horizon]
 
@@ -200,8 +177,6 @@ class GCN_TPOSE(nn.Module):
         # * idct
         root_traj = torch.matmul(idct_m[None],root_pred.reshape([bs,-1,len(root_idx)])) #[bs,t_total=90,3]
 
-        
-
         y = []
         # xshape" [30, bs, 63]
         ylast = x[-1] # [bs,63]
@@ -214,11 +189,10 @@ class GCN_TPOSE(nn.Module):
 
             #Replace root_idx of ylast with future rt (that wev've just predicted)
             ylast[:, root_idx] = rt
-            # ! We could place this before replacing the root joints
             yl_res = ylast
             ylast = ylast.reshape(bs, -1, c).permute(0,2,1).unsqueeze(2) # [bs, c,t, v]
 
-            yall_res = yall[:,:,1:] # ! This should be yall[:,:,-1:] since we are using the last frame for the next prediction 
+            yall_res = yall[:,:,1:]
             yall = torch.cat([yall, ylast], dim=2) # [bs, c, t+1, v]
             yall_dec = self.x_stsgcn_dec(yall) # [bs, c, t+1, v]
             
@@ -228,7 +202,6 @@ class GCN_TPOSE(nn.Module):
             if self.wcont:
                 contx = cont[:,i].unsqueeze(2).unsqueeze(3).repeat(1,1,31,21)
                 yall_dec = torch.cat([yall_dec, contx], dim=1)
-                #ylast = torch.cat([ylast, cont[:, i]], dim=1) # y(t)||context(t)||contact(t+1)
             
             for att in (self.dec_module):
                 yall_dec = att(yall_dec)

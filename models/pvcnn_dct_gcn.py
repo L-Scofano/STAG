@@ -39,10 +39,7 @@ class PVCNN2_DCT_CONT_GCN(nn.Module):
         self.fp_blocks = fp_blocks = model_specs.get('fp_blocks', fp_blocks)
 
         # encode input human poses
-        #self.x_enc = nn.Linear(input_dim+aux_dim, nh_rnn)
         self.x_stsgcn_enc = STSGCN_layer(3, self.nh_rnn, (1,1), 1, time_dim=30, joints_dim=21)
-        #self.x_stsgcn_CP = STSGCN_layer(3, self.nh_rnn, (1,1), 1, time_dim=30, joints_dim=21)
-        #self.x_gru = nn.GRU(self.nh_rnn,self.nh_rnn)
         self.x_time_enc = nn.Sequential(nn.Linear(30, 10),
                                       nn.Tanh(),
                                       nn.Linear(10, 1),
@@ -84,8 +81,6 @@ class PVCNN2_DCT_CONT_GCN(nn.Module):
         else:
              hx = xi
 
-        #hx = self.x_enc(hx)
-        #hx = self.x_gru(hx)[1][0] # [bs, dim]
         hxCP = self.x_stsgcn_enc(hx).permute(0,1,3,2).reshape(b, -1, t)
         hxCP = self.x_time_enc(hxCP).squeeze(-1).reshape(b,-1,v) # [b,c,v]
         hxCP = self.x_node_enc(hxCP).squeeze(-1) # [b,c]

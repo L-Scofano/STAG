@@ -1,3 +1,4 @@
+from models.gcn_gru import GCN_POSE
 from models.rnn import *
 from models.pvcnn_dct_gcn import *
 

@@ -272,7 +272,7 @@ def main(gpu, cfg, args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', default='gta_stage2_GRU_POSE')
+    parser.add_argument('--cfg', default='gta_stage2_GCN_POSE')
     parser.add_argument('--mode', default='train')
     parser.add_argument('--test', action='store_true', default=False)
     parser.add_argument('--iter', type=int, default=0)

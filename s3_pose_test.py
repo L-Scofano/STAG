@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--cfg_cont', default='gta_stage1_PVCNN2_DCT_CONT')
-    parser.add_argument('--cfg', default='gta_stage2_GRU_POSE')
+    parser.add_argument('--cfg', default='gta_stage2_GCN_POSE')
     parser.add_argument('--mode', default='test')
     parser.add_argument('--test', action='store_true', default=False)
     parser.add_argument('--w_est_cont', action='store_true', default=False)
